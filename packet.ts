@@ -12,6 +12,9 @@ enum HeaderType {
 
 const HeaderByteLen = 5;
 
+var max = 1 << (24 - 1);
+var min = 1 << 14;
+
 class Packet {
   _buf: ArrayBuffer;
   _bufv: Uint8Array;

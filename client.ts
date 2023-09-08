@@ -1,4 +1,5 @@
 import { EventEmitter } from "./emitter";
+import { Packet } from "./packet";
 import { Struct2bytes } from "./transformer";
 import net from "net";
 
@@ -15,8 +16,6 @@ class CRequest {
   write(byte: Uint8Array) {
     this._buffer = byte;
   }
-
-  writeHeader();
 }
 
 interface IConn extends EventEmitter {

@@ -1,8 +1,5 @@
 var littleEndian = true;
 
-var max = 1 << (24 - 1);
-var min = 1 << 14;
-
 function Struct2bytes(obj: Object): Uint8Array {
   const buffer = new ArrayBuffer(1024);
   const dataView = new DataView(buffer);
