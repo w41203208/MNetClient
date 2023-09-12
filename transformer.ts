@@ -1,10 +1,10 @@
 var littleEndian = true;
 
-function Struct2bytes(obj: Object): Uint8Array {
+function Struct2bytes<T extends object>(obj: T): Uint8Array {
   const buffer = new ArrayBuffer(1024);
   const dataView = new DataView(buffer);
-  const stack: Object[] = [];
-
+  const stack: Array<any> = [];
+  type objKeys = keyof T;
   let s_offset = 0;
   stack.push(obj);
 
@@ -12,7 +12,10 @@ function Struct2bytes(obj: Object): Uint8Array {
     const obj_t = stack.shift();
     const o_keys = Reflect.ownKeys(obj_t!);
     o_keys.forEach((k: any) => {
-      var v = Reflect.get(obj_t!, k);
+      var v = Reflect.get<T, objKeys>(obj_t!, k);
+      if (v === null) {
+        return;
+      }
       if (typeof v !== "object") {
         if (typeof v === "number") {
           let is_negative = false;
@@ -74,13 +77,24 @@ function Struct2bytes(obj: Object): Uint8Array {
   return view;
 }
 
+function byte2Struct<T extends object>(buf: Uint8Array) {}
+
 function setViewUint8(dv: DataView, offset: number, value: any): number {
   dv.setUint8(offset, value);
   return 1;
 }
+
+function getViewUint8(dv: DataView, offset: number): number {
+  return dv.getUint8(offset);
+}
+
 function setViewInt8(dv: DataView, offset: number, value: any): number {
   dv.setInt8(offset, value);
   return 1;
+}
+
+function getViewInt8(dv: DataView, offset: number): number {
+  return dv.getInt8(offset);
 }
 
 function setViewUint32(dv: DataView, offset: number, value: any): number {
@@ -88,19 +102,34 @@ function setViewUint32(dv: DataView, offset: number, value: any): number {
   return 4;
 }
 
+function getViewUint32(dv: DataView, offset: number): number {
+  return dv.getUint32(offset);
+}
+
 function setViewInt32(dv: DataView, offset: number, value: any): number {
-  dv.setUint32(offset, value, littleEndian);
+  dv.setInt32(offset, value, littleEndian);
   return 4;
+}
+
+function getViewInt32(dv: DataView, offset: number): number {
+  return dv.getInt32(offset);
 }
 
 function setViewFloat32(dv: DataView, offset: number, value: any): number {
   dv.setFloat32(offset, value, littleEndian);
   return 4;
 }
+function getViewFloat32(dv: DataView, offset: number): number {
+  return dv.getFloat32(offset);
+}
 
 function setViewFloat64(dv: DataView, offset: number, value: any): number {
   dv.setFloat32(offset, value, littleEndian);
   return 8;
+}
+
+function getViewFloat64(dv: DataView, offset: number): number {
+  return dv.getFloat32(offset);
 }
 
 export { Struct2bytes, littleEndian };
