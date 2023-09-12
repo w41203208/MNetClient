@@ -1,3 +1,4 @@
+import { CRequest } from "./Request";
 import { EventEmitter } from "./emitter";
 import { Packet } from "./packet";
 import { Struct2bytes } from "./transformer";
@@ -6,16 +7,6 @@ import net from "net";
 class CResponse<T> {
   _body: T;
   constructor() {}
-}
-
-class CRequest {
-  _buffer: Uint8Array;
-  _packet: Packet;
-  constructor() {}
-
-  write(byte: Uint8Array) {
-    this._buffer = byte;
-  }
 }
 
 interface IConn extends EventEmitter {
