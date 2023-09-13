@@ -1,48 +1,15 @@
-import { CRequest } from "./Request";
+import { IConn, createConn } from "./Conn";
+import { CRequest, RequestType } from "./Request";
 import { EventEmitter } from "./emitter";
-import { Packet } from "./packet";
 import { Struct2bytes } from "./transformer";
-import net from "net";
 
 class CResponse<T> {
   _body: T;
   constructor() {}
 }
 
-interface IConn extends EventEmitter {
-  write(buf: Uint8Array);
-
-  getStatus();
-}
-
-class Conn extends EventEmitter implements IConn {
-  _socket: net.Socket;
-  constructor(s: net.Socket) {
-    super();
-    this._socket = s;
-
-    this._socket.on("connect", () => {
-      console.log("connecting");
-    });
-
-    this._socket.on("data", (data: Uint8Array) => {
-      this.emit("data", data);
-    });
-
-    this._socket.on("close", () => {
-      console.log("closing");
-    });
-  }
-
-  write(buf: Uint8Array) {
-    this._socket.write(buf);
-  }
-
-  getStatus() {}
-}
-
 interface IConnClient {
-  sendRequest<T>(data: any): Promise<CResponse<T>>;
+  sendRequest<T>(data: any, requestType: RequestType): Promise<CResponse<T>>;
 }
 
 class CConnClient implements IConnClient {
@@ -50,15 +17,11 @@ class CConnClient implements IConnClient {
   _emitter: EventEmitter;
   constructor(c: IConn) {
     this._conn = c;
-
     this._emitter = new EventEmitter();
   }
 
-  sendRequest<T>(data: any): Promise<CResponse<T>> {
-    const req = this.newRequest();
-    const payloadBuf = Struct2bytes(data);
-
-    // req.write(Struct2bytes(data));
+  sendRequest<T>(data: any, type: RequestType): Promise<CResponse<T>> {
+    const req = this.newRequest(data, type);
 
     return new Promise((resolve, reject) => {
       // 監聽自己的 read 是否讀到東西
@@ -75,22 +38,14 @@ class CConnClient implements IConnClient {
     });
   }
 
-  private newRequest() {
-    return new CRequest();
+  private newRequest(type: RequestType, data: any) {
+    return new CRequest(data, type);
   }
 }
 
-const newConnectionClient = (host: string, port: number): CConnClient => {
-  const socket = net.connect({
-    port: port,
-    host: host,
-    family: 0,
-  });
-
-  const c: IConn = new Conn(socket);
-  const client = new CConnClient(c);
-
-  return client;
+const dial = (host: string, port: number): CConnClient => {
+  const conn: IConn = createConn(host, port);
+  return new CConnClient(conn);
 };
 
-export { newConnectionClient };
+export { CConnClient, dial };

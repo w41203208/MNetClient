@@ -12,9 +12,6 @@ enum HeaderType {
 
 const HeaderByteLen = 5;
 
-var max = 1 << (24 - 1);
-var min = 1 << 14;
-
 class Packet {
   _buf: ArrayBuffer;
   _bufv: Uint8Array;
@@ -25,6 +22,17 @@ class Packet {
     endStream: boolean,
     paded: Uint8Array | null = null
   ) {
+    if (paded) {
+      const len = data.length + paded.length;
+      if (len > max) {
+        // error => data is too much.
+      }
+    } else {
+      if (data.length > max) {
+        // error => data is too much.
+      }
+    }
+
     let b_len = HeaderByteLen + data.length;
     if (paded) {
       b_len += paded.length;
@@ -63,6 +71,8 @@ class Packet {
     dlen_view[1] = len >> 8;
     dlen_view[2] = len >> 16;
   }
+
+  setMaxReadFrameSize() {}
 }
 
 export { Packet };

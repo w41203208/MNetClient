@@ -132,4 +132,4 @@ function getViewFloat64(dv: DataView, offset: number): number {
   return dv.getFloat32(offset);
 }
 
-export { Struct2bytes, littleEndian };
+export { Struct2bytes };
