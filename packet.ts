@@ -12,27 +12,17 @@ enum HeaderType {
 
 const HeaderByteLen = 5;
 
-class Packet {
+class CPacket {
   _buf: ArrayBuffer;
   _bufv: Uint8Array;
+
   constructor() {}
 
-  writeData(
+  WriteData(
     data: Uint8Array,
     endStream: boolean,
     paded: Uint8Array | null = null
   ) {
-    if (paded) {
-      const len = data.length + paded.length;
-      if (len > max) {
-        // error => data is too much.
-      }
-    } else {
-      if (data.length > max) {
-        // error => data is too much.
-      }
-    }
-
     let b_len = HeaderByteLen + data.length;
     if (paded) {
       b_len += paded.length;
@@ -54,7 +44,7 @@ class Packet {
     this.writeEnd();
   }
 
-  writeHeader(type: number, flags: number) {
+  private writeHeader(type: number, flags: number) {
     const view = new Uint8Array(this._buf, 0, HeaderByteLen);
     view[0] = 0;
     view[1] = 0;
@@ -63,7 +53,7 @@ class Packet {
     view[4] = flags;
   }
 
-  writeEnd() {
+  private writeEnd() {
     this._bufv = new Uint8Array(this._buf);
     const len = this._bufv.length - HeaderByteLen;
     const dlen_view = new Uint8Array(HeaderByteLen);
@@ -71,8 +61,6 @@ class Packet {
     dlen_view[1] = len >> 8;
     dlen_view[2] = len >> 16;
   }
-
-  setMaxReadFrameSize() {}
 }
 
-export { Packet };
+export { CPacket };

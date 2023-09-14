@@ -1,6 +1,6 @@
 ### 目前進度
 
-1. packet
+1. client read
 
 ### 參考
 

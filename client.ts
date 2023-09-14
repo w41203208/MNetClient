@@ -1,51 +1,70 @@
-import { IConn, createConn } from "./Conn";
-import { CRequest, RequestType } from "./Request";
+import { IConn, dial } from "./Conn";
+import { IRequest, IRequestGenerate } from "./Request";
+import { IResponse } from "./Response";
 import { EventEmitter } from "./emitter";
-import { Struct2bytes } from "./transformer";
-
-class CResponse<T> {
-  _body: T;
-  constructor() {}
-}
+import { ITransport } from "./transport";
 
 interface IConnClient {
-  sendRequest<T>(data: any, requestType: RequestType): Promise<CResponse<T>>;
+  SendRequest(data: any): Promise<IResponse>;
 }
 
 class CConnClient implements IConnClient {
   _conn: IConn;
+
+  _host: string;
+  _port: number;
   _emitter: EventEmitter;
-  constructor(c: IConn) {
-    this._conn = c;
+  _requestGen: IRequestGenerate;
+  _transport: ITransport;
+  constructor(
+    host: string,
+    port: number,
+    reqG: IRequestGenerate,
+    transport: ITransport
+  ) {
+    this._host = host;
+    this._port = port;
+    this._requestGen = reqG;
+    this._transport = transport;
+
     this._emitter = new EventEmitter();
   }
 
-  sendRequest<T>(data: any, type: RequestType): Promise<CResponse<T>> {
-    const req = this.newRequest(data, type);
+  NewRequest(data: Uint8Array): IRequest {
+    return this._requestGen.NewRequest(data);
+  }
+
+  SendRequest(req: IRequest): Promise<IResponse> {
+    this.send(req);
 
     return new Promise((resolve, reject) => {
-      // 監聽自己的 read 是否讀到東西
-
-      this._conn.on("data", (data: Uint8Array) => {
-        console.log("receive data: ", data);
-
-        // 用 read 到的東西創建 Response
-        const resp = new CResponse<T>();
-
+      this._transport.on("data", (resp: IResponse) => {
+        console.log("receive data: ", resp);
         // resolve
         resolve(resp);
       });
     });
   }
 
-  private newRequest(type: RequestType, data: any) {
-    return new CRequest(data, type);
+  private getConnectionInfo() {
+    return {
+      host: this._host,
+      port: this._port,
+    };
+  }
+
+  private send(req: IRequest) {
+    this._transport.RoundTrip(req, this.getConnectionInfo.apply(this));
   }
 }
 
-const dial = (host: string, port: number): CConnClient => {
-  const conn: IConn = createConn(host, port);
-  return new CConnClient(conn);
+const CreateClient = (
+  host: string,
+  port: number,
+  reqG: IRequestGenerate,
+  transport: ITransport
+) => {
+  return new CConnClient(host, port, reqG, transport);
 };
 
-export { CConnClient, dial };
+export { CreateClient, CConnClient };

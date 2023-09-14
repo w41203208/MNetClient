@@ -1,34 +1,32 @@
-import { Packet } from "./packet";
-import { Struct2bytes } from "./transformer";
+// enum RequestType {
+//   Open = "open",
+//   Close = "close",
+//   Data = "data",
+// }
 
-enum RequestType {
-  Open = "open",
-  Close = "close",
-  Data = "data",
+interface IRequestGenerate {
+  NewRequest(body: Uint8Array): IRequest;
 }
 
-class CRequest {
-  _buffer: Uint8Array;
-  _packet: Packet;
-  _type: RequestType;
-  _data: any;
-  constructor(data: RequestType, type: any) {
-    this._type = type;
-    this._data = data;
-    this._packet = new Packet();
+class CRequestGenerate implements IRequestGenerate {
+  NewRequest(body: Uint8Array): IRequest {
+    return new CRequest(body);
   }
-
-  pack() {
-    const payloadBuf = Struct2bytes(this._data);
-
-    switch (this._type) {
-      case RequestType.Data:
-        // this._packet.writeData(payloadBuf);
-        break;
-    }
-  }
-
-  unpack() {}
 }
 
-export { CRequest, RequestType };
+interface IRequest {
+  GetBody(): Uint8Array;
+}
+
+class CRequest implements IRequest {
+  _body: Uint8Array;
+  constructor(body: Uint8Array) {
+    this._body = body;
+  }
+
+  GetBody(): Uint8Array {
+    return this._body;
+  }
+}
+
+export { CRequest, CRequestGenerate, IRequestGenerate, IRequest };

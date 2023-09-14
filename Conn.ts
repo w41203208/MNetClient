@@ -1,14 +1,17 @@
 import { EventEmitter } from "./emitter";
 import net from "net";
 
-interface IConn extends EventEmitter {
-  write(buf: Uint8Array);
+type ConnStatus = "Idle" | "Busy" | "Wait";
 
-  getStatus();
+interface IConn extends EventEmitter {
+  write(buf: Uint8Array): void;
+
+  getStatus(): ConnStatus;
 }
 
 class Conn extends EventEmitter implements IConn {
   _socket: net.Socket;
+  _status: ConnStatus;
   constructor(s: net.Socket) {
     super();
     this._socket = s;
@@ -29,11 +32,15 @@ class Conn extends EventEmitter implements IConn {
   write(buf: Uint8Array) {
     this._socket.write(buf);
   }
-
-  getStatus() {}
+  setStatus(status: ConnStatus) {
+    this._status = status;
+  }
+  getStatus(): ConnStatus {
+    return this._status;
+  }
 }
 
-const createConn = (host: string, port: number): Conn => {
+const dial = (host: string, port: number): Conn => {
   const socket = net.connect({
     port: port,
     host: host,
@@ -43,4 +50,4 @@ const createConn = (host: string, port: number): Conn => {
   return new Conn(socket);
 };
 
-export { Conn, IConn, createConn };
+export { Conn, IConn, dial };
