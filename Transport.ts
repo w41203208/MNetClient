@@ -2,12 +2,13 @@ import { IConn, dial } from "./Conn";
 import { IRequest } from "./Request";
 import { IResponse, CResponse } from "./Response";
 import { EventEmitter } from "./emitter";
+import { Readable, Writable } from "stream";
 import { CPacket } from "./packet";
 
-type OptFunction = () => { host: string; port: number };
+// type OptFunction = () => { host: string; port: number };
 
 interface ITransport extends EventEmitter {
-  RoundTrip(req: IRequest, OptFunc: OptFunction): IResponse;
+  RoundTrip(req: IRequest, host: string, port: number): IResponse;
 }
 
 var MaxCPacketReadSize = 1 << (24 - 1);
@@ -15,6 +16,8 @@ var MinMaxCPacketReadSize = 1 << 14;
 
 class Transport extends EventEmitter implements ITransport {
   _conn: IConn;
+  _w: Writable;
+  _r: Readable;
 
   // 16KB ~ 16MB
   _packetReadSize: number; //read
@@ -25,16 +28,18 @@ class Transport extends EventEmitter implements ITransport {
     this._packetWriteSize = 1 << (24 - 1);
     this._packetReadSize = readSize;
     this._controlFlow = controlFlow;
+
+    this._w = new Writable();
+    this._r = new Readable();
   }
 
-  RoundTrip(req: IRequest, OptFunc: OptFunction): Promise<IResponse> {
-    const { host, port } = OptFunc();
+  RoundTrip(req: IRequest, host: string, port: number): Promise<IResponse> {
     this._conn = this.dialClientConn(host, port);
     this.doRequest(req);
 
     return new Promise((resolve, reject) => {
       this._conn.on("data", (data: Uint8Array) => {
-        data;
+        // data;
 
         resolve(new CResponse());
       });

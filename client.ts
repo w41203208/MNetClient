@@ -46,15 +46,8 @@ class CConnClient implements IConnClient {
     });
   }
 
-  private getConnectionInfo() {
-    return {
-      host: this._host,
-      port: this._port,
-    };
-  }
-
   private send(req: IRequest) {
-    this._transport.RoundTrip(req, this.getConnectionInfo.apply(this));
+    this._transport.RoundTrip(req, this._host, this._port);
   }
 }
 
