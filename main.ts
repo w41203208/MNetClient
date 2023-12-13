@@ -10,7 +10,7 @@ process.stdin.setEncoding("utf-8");
     while ((input = process.stdin.read()) !== null) {
       input = input.slice(0, -2);
       const res = await client.send(input);
-      console.log(res.toString());
+      console.log(res);
       // socket.write(new_input);
       // const buffer = Struct2bytes(tt);
 

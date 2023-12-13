@@ -38,6 +38,9 @@ class Transport extends EventEmitter implements ITransport {
     this.doRequest(req);
 
     return new Promise((resolve, reject) => {
+      this._conn.on("readable", (data) => {
+        
+      })
       this._conn.on("data", (data: Uint8Array) => {
         // data;
 

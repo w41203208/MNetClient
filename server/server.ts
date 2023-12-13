@@ -9,7 +9,7 @@ const CreateServer = (addr: string) => {
 
     conn.write("Hello Client!");
     conn.on("data", (data) => {
-      console.log(`Server sned data: ${data.toString()}`);
+      console.log(`Server send data: ${data.toString()}`);
 
       conn.write(data);
     });
@@ -20,6 +20,7 @@ const CreateServer = (addr: string) => {
   server.listen(addr, () => {
     console.log("server is listening");
   });
+
   return server;
 };
 
