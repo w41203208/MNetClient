@@ -1,6 +1,7 @@
-### 目前進度
+### 目前進度 ( unfinished )
 
 1. client read
+2. Use writer or reader to read or write data to tcp socket
 
 ### 參考
 
